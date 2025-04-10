@@ -2,4 +2,4 @@
 
 Finds unused AWS resources.
 
-See [Readme](tidy_aws/Readme.md) for more.
+See [Readme](tidy_aws/README.md) for more.
