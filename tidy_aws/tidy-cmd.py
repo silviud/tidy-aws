@@ -1,17 +1,24 @@
 import boto3
 import os
 import logging
+from boto3.session import Session
 from pprint import pprint
+from typing import Dict, List
 
 
-DEFAULT_REGION = 'us-east-1'
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-def list_unattached_ebs_volumes():
+
+def get_aws_client(service: str, region: str = 'us-east-1') -> Session:
+
+    return boto3.client('ec2', region_name=os.environ.get('AWS_REGION', region))
+
+
+def list_unattached_ebs_volumes() -> List[Dict]:
     """ Filter volumes that are not attached """
 
-    ec2_client = boto3.client('ec2', region_name=os.environ.get('AWS_REGION', DEFAULT_REGION))
+    ec2_client = get_aws_client('ec2')
 
     volumes = ec2_client.describe_volumes(Filters=[{'Name': 'status', 'Values': ['available']}])
     unattached_volumes = []
