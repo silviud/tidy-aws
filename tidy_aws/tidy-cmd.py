@@ -1,8 +1,9 @@
+import csv
 import json
 import logging
 import os
+import sys
 from datetime import datetime, timedelta, timezone
-from pprint import pprint
 from typing import Dict, List
 
 import boto3
@@ -223,6 +224,15 @@ def list_unused_elbv2(elbv2_client: Session = None) -> List[Dict]:
     return unused_load_balancers
 
 
+def write_csv(data: List) -> str:
+    if not data:
+        return
+
+    writer = csv.DictWriter(sys.stdout, fieldnames=data[0].keys())
+    writer.writeheader()
+    writer.writerows(data)
+
+
 @click.command()
 @click.option(
     "--command",
@@ -231,18 +241,19 @@ def list_unused_elbv2(elbv2_client: Session = None) -> List[Dict]:
 )
 @click.option("--output", default="json", type=click.Choice(["json", "csv", "table"]))
 def main(command, output):
-
-    data = None
+    data = []
 
     if command == "ec2_unattached_ebs_volumes":
         data = list_unattached_ebs_volumes()
+    elif command == "ec2_old_amis":
+        data = list_old_amis()
     else:
         click.echo("Not implemented")
 
     if output == "json":
         click.echo(json.dumps(data, indent=2))
     elif output == "csv":
-        click.echo(json.dumps(data, indent=2))
+        click.echo(write_csv(data))
     elif output == "table":
         click.echo(json.dumps(data, indent=2))
 
