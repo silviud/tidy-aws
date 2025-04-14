@@ -1,11 +1,13 @@
-import boto3
-import os
+import json
 import logging
-from boto3.session import Session
+import os
 from datetime import datetime, timedelta, timezone
 from pprint import pprint
 from typing import Dict, List
 
+import boto3
+import click
+from boto3.session import Session
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -221,23 +223,28 @@ def list_unused_elbv2(elbv2_client: Session = None) -> List[Dict]:
     return unused_load_balancers
 
 
-def main():
-    volumes = list_unattached_ebs_volumes()
-    if volumes:
-        pprint(volumes)
+@click.command()
+@click.option(
+    "--command",
+    default="ec2_unattached_ebs_volumes",
+    type=click.Choice(["ec2_unattached_ebs_volumes", "ec2_old_amis", "ec2_eips"]),
+)
+@click.option("--output", default="json", type=click.Choice(["json", "csv", "table"]))
+def main(command, output):
+
+    data = None
+
+    if command == "ec2_unattached_ebs_volumes":
+        data = list_unattached_ebs_volumes()
     else:
-        logger.info("No unattached volumes.")
-    #
-    # snapshots = list_old_ebs_snapshots()
-    # if snapshots:
-    #     pprint(snapshots)
-    # else:
-    #     logger.info("No old snaphots.")
-    # old_amis = list_old_amis()
-    # if old_amis:
-    #     pprint(old_amis)
-    # else:
-    #     logger.info("No old ami.")
+        click.echo("Not implemented")
+
+    if output == "json":
+        click.echo(json.dumps(data, indent=2))
+    elif output == "csv":
+        click.echo(json.dumps(data, indent=2))
+    elif output == "table":
+        click.echo(json.dumps(data, indent=2))
 
 
 if __name__ == "__main__":
