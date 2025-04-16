@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_aws_client(service: str, region: str = "us-east-1") -> Session:
-    return boto3.client("ec2", region_name=os.environ.get("AWS_REGION", region))
+    return boto3.client(service, region_name=os.environ.get("AWS_REGION", region))
 
 
 # ec2 helpers
@@ -237,7 +237,22 @@ def write_csv(data: List) -> str:
 @click.option(
     "--command",
     default="ec2_unattached_ebs_volumes",
-    type=click.Choice(["ec2_unattached_ebs_volumes", "ec2_old_amis", "ec2_eips"]),
+    type=click.Choice(
+        [
+            "ec2_unattached_ebs_volumes",
+            "ec2_old_ebs_snapshots",
+            "ec2_old_amis",
+            "ec2_unsed_eips",
+            "ec2_unsed_elbs",
+            "ec2_unsed_elbv2",
+        ]
+    ),
+    help="""
+Various ec2 categories.
+Snapshots are over 30 days.
+Elb/Elbv2 are not working. WIP.
+
+    """,
 )
 @click.option("--output", default="json", type=click.Choice(["json", "csv", "table"]))
 def main(command, output):
@@ -245,8 +260,16 @@ def main(command, output):
 
     if command == "ec2_unattached_ebs_volumes":
         data = list_unattached_ebs_volumes()
+    elif command == "ec2_old_ebs_snapshots":
+        data = list_old_ebs_snapshots()
     elif command == "ec2_old_amis":
         data = list_old_amis()
+    elif command == "ec2_unsed_eips":
+        data = list_unused_elastic_ips()
+    elif command == "ec2_unsed_elbs":
+        data = list_unassociated_elbs()
+    elif command == "ec2_unsed_elbv2":
+        data = list_unused_elbv2()
     else:
         click.echo("Not implemented")
 
