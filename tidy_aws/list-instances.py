@@ -25,9 +25,9 @@ def print_instances(instances: list, f_type: str = 'table'):
             print(f'Instance ID: {instance.id}, State: {instance.state["Name"]}, Type: {instance.instance_type}, Launch Time: {instance.launch_time}')
     elif f_type == 'csv':
         if instances:
-            print('InstanceID, State, Type, LaunchTime')
+            print('InstanceID,State,Type,LaunchTime')
             for instance in instances:
-                print(f'{instance.id}, {instance.state["Name"]}, {instance.instance_type}, {instance.launch_time}')
+                print(f'{instance.id},{instance.state["Name"]},{instance.instance_type},{instance.launch_time}')
     else:
         print(f'Unsupported format {f_type}')
 
